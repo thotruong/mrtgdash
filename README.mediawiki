@@ -6,8 +6,10 @@ It is still in development, but otherwise fully working.
 
 ==Installation==
 
-Simply place index.php inside your MRTG directory on your PHP-enabled web server. That's it.
+Simply place index.php inside your MRTG directory on your PHP-enabled web server. That's it. Assumes all your MRTG output files are in one directory and you don't have anything fancier set up.
 
 ==Todo==
 
-# Add option to switch to longer-timescale graphs
+# Add option to switch to longer-timescale graphs.
+# Ensure it works acceptably on mobile devices.
+# Perhaps use Highcharts to render the data directly.
