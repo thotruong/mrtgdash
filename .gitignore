@@ -1,0 +1,16 @@
+# IDE crap
+/nbproject
+/.settings
+/.buildpath
+/.project
+ 
+# Mac OS crap
+.DS_Store
+.TemporaryItems
+._*
+
+# MRTG stuff
+*.html*
+*.png*
+*.log
+*.old
