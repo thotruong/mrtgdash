@@ -1,0 +1,13 @@
+==Introduction==
+
+MRTG Dashboard is a self contained PHP script which turns your directory of MRTG graphs into a pretty dashboard.
+
+It is still in development, but otherwise fully working.
+
+==Installation==
+
+Simply place index.php inside your MRTG directory on your PHP-enabled web server. That's it.
+
+==Todo==
+
+# Add option to switch to longer-timescale graphs
