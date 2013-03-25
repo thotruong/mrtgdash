@@ -4,12 +4,16 @@ MRTG Dashboard is a self contained PHP script which turns your directory of MRTG
 
 It is still in development, but otherwise fully working.
 
+==Requirements==
+
+# MRTG, configured and running, saving files into a single directory (workdir).
+# PHP enabled web server.
+# Your browser requires general Internet access as CDNs are used to load CSS and Javascript libraries.
+
 ==Installation==
 
-Simply place index.php inside your MRTG directory on your PHP-enabled web server. That's it. Assumes all your MRTG output files are in one directory and you don't have anything fancier set up.
+Simply place index.php inside your MRTG directory on your web server. That's it.
 
 ==Todo==
 
-# Add option to switch to longer-timescale graphs.
-# Ensure it works acceptably on mobile devices.
 # Perhaps use Highcharts to render the data directly.

@@ -25,7 +25,7 @@ class Dashboard {
 	 * 
 	 * @var string 
 	 */
-	public $version = '1.003';
+	public $version = '1.004';
 	
 	/**
 	 * MRTG entities
@@ -141,11 +141,11 @@ $dashboard = new Dashboard();
 	<meta http-equiv="pragma" content="no-cache" />
 	<meta http-equiv="cache-control" content="no-cache" />
 
-	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" />
-	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&#038;subset=latin,latin-ext" type="text/css" media="all" />
+	<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&#038;subset=latin,latin-ext" type="text/css" media="all" />
 	
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-	<script type="text/javascript" src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script type="text/javascript" src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 	
 	<style type="text/css">
 
@@ -202,12 +202,6 @@ $dashboard = new Dashboard();
 			float: right;
 		}
 		
-		DIV.entity:nth-child(2n+1) {
-			background: #F1F1F1;
-			padding-bottom: 1em;
-			border-radius: 5px;
-		}
-		
 		DIV.entity H2 {
 			font-weight: normal;
 			font-size: 150%;
@@ -218,6 +212,9 @@ $dashboard = new Dashboard();
 			margin: 0px 10px 0px 10px;
 			width: 500px;
 			height: 135px;
+			-moz-box-shadow: 0px 0px 10px #AAA;
+			-webkit-box-shadow: 0px 0px 10px #AAA;
+			box-shadow: 0px 0px 10px #AAA;
 		}
 
 		DIV.entity DIV.graphs {
@@ -236,11 +233,13 @@ $dashboard = new Dashboard();
 				font-size: 75%;
 			}
 
-			DIV.entity DIV.graphs DIV.graphLabel.day {
+			DIV.entity DIV.graphs DIV.graphLabel.day,
+			DIV.entity DIV.graphs DIV.graphLabel.month {
 				left: 260px;
 			}
 
-			DIV.entity DIV.graphs DIV.graphLabel.week {
+			DIV.entity DIV.graphs DIV.graphLabel.week,
+			DIV.entity DIV.graphs DIV.graphLabel.year {
 				left: 780px;
 			}
 
@@ -248,12 +247,11 @@ $dashboard = new Dashboard();
 			float: right;
 			margin-right: 15px;
 			margin-top: 10px;
-			background: #EEE;
-			padding: 2px 2px 2px 2px;
-			font-size: 75%;
-			border-radius: 2px;
-			border: 1px solid #999;
 		}
+		
+			DIV.entity SPAN.options A.btn {
+				padding: 3px 4px;
+			}
 		
 			DIV.entity SPAN.options IMG {
 				margin-left: 2px;
@@ -274,15 +272,40 @@ $dashboard = new Dashboard();
 		$('#lastUpdate').click(function() { updateGraphs(); }).tooltip();
 		
 		// add graph labels
-		$('DIV.entity DIV.graphs IMG.graph').each(function() {
-			var scale = $(this).attr('scale');
-			var label = $('<div class="graphLabel '+scale+'">'+scale+'</div>');
-			$(this).parent().parent().append(label);
+		addGraphLabels();
+		
+		// change scale change button click
+		$('A.change-scale').click(function() {
+			
+			$(this).parent().parent().children('DIV.graphs').children('IMG.graph').each(function() {
+				
+				// determine new scale
+				var oldScale = $(this).attr('scale');
+				if (oldScale == 'day') var newScale = 'month';
+				if (oldScale == 'week') var newScale = 'year';
+				if (oldScale == 'month') var newScale = 'day';
+				if (oldScale == 'year') var newScale = 'week';
+				
+				// change scale and update
+				$(this).attr('scale', newScale);
+				updateGraphs($(this));
+				addGraphLabels();
+				
+			});
+			
+			
+		});
+		
+		// handle clicks on the graphs
+		$('IMG.graph').click(function() {
+			window.location = $(this).attr('entity')+'.html';
 		});
 		
 		// add images and tooltips to option icons
-		$('DIV.entity SPAN.options IMG.icon.log').attr('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIpSURBVDjLjZNPSFRRFMZ/9707o0SOOshM0x/JFtUmisKBooVEEUThsgi3KS0CN0G2lagWEYkSUdsRWgSFG9sVFAW1EIwQqRZiiDOZY804b967954249hUpB98y/PjO5zzKREBQCm1E0gDPv9XHpgTEQeAiFCDHAmCoBhFkTXGyL8cBIGMjo7eA3YDnog0ALJRFNlSqSTlcrnulZUVWV5elsXFRTHGyMLCgoyNjdUhanCyV9ayOSeIdTgnOCtY43DWYY3j9ulxkskkYRjinCOXy40MDAzcZXCyVzZS38MeKRQKf60EZPXSXInL9y+wLZMkCMs0RR28mJ2grSWJEo+lH9/IpNPE43GKxSLOOYwxpFIpAPTWjiaOtZ+gLdFKlJlD8u00xWP8lO/M5+e5efEB18b70VqjlMJai++vH8qLqoa+nn4+fJmiNNPCvMzQnIjzZuo1V88Ns3/HAcKKwfd9tNZorYnFYuuAMLDMfJ3m+fQznr7L0Vk9zGpLmezB4zx++YggqhAFEZ7n4ft+HVQHVMoB5++cJNWaRrQwMjHM9qCLTFcnJJq59WSIMLAopQDwfR/P8+oAbaqWK2eGSGxpxVrDnvQ+3s++4tPnj4SewYscUdUgIiilcM41/uXZG9kNz9h9aa+EYdjg+hnDwHDq+iGsaXwcZ6XhsdZW+FOqFk0B3caYt4Bic3Ja66NerVACOGttBXCbGbbWrgJW/VbnXbU6e5tMYIH8L54Xq0cq018+AAAAAElFTkSuQmCC');
-		$('DIV.entity SPAN.options IMG').tooltip();
+		$('DIV.entity SPAN.options IMG.icon.log').attr('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADoSURBVBgZBcExblNBGAbA2ceegTRBuIKOgiihSZNTcC5LUHAihNJR0kGKCDcYJY6D3/77MdOinTvzAgCw8ysThIvn/VojIyMjIyPP+bS1sUQIV2s95pBDDvmbP/mdkft83tpYguZq5Jh/OeaYh+yzy8hTHvNlaxNNczm+la9OTlar1UdA/+C2A4trRCnD3jS8BB1obq2Gk6GU6QbQAS4BUaYSQAf4bhhKKTFdAzrAOwAxEUAH+KEM01SY3gM6wBsEAQB0gJ+maZoC3gI6iPYaAIBJsiRmHU0AALOeFC3aK2cWAACUXe7+AwO0lc9eTHYTAAAAAElFTkSuQmCC');
+		$('DIV.entity SPAN.options IMG.icon.time').attr('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAKrSURBVDjLpdPbT9IBAMXx/qR6qNbWUy89WS5rmVtutbZalwcNgyRLLMyuoomaZpRQCt5yNRELL0TkBSXUTBT5hZSXQPwBAvor/fZGazlb6+G8nIfP0znbgG3/kz+Knsbb+xxNV63DLxVLHzqV0vCrfMluzFmw1OW8ePEwf8+WgM1UXDnapVgLePr5Nj9DJBJGFEN8+TzKqL2RzkenV4yl5ws2BXob1WVeZxXhoB+PP0xzt0Bly0fKTePozV5GphYQPA46as+gU5/K+w2w6Ev2Ol/KpNCigM01R2uPgDcQIRSJEYys4JmNoO/y0tbnY9JlxnA9M15bfHZHCnjzVN4x7TLz6fMSJqsPgLAoMvV1niSQBGIbUP3Ki93t57XhItVXjulTQHf9hfk5/xgGyzQTgQjx7xvE4nG0j3UsiiLR1VVaLN3YpkTuNLgZGzRSq8wQUoD16flkOPSF28/cLCYkwqvrrAGXC1UYWtuRX1PR5RhgTJTI1Q4wKwzwWHk4kQI6a04nQ99mUOlczMYkFhPrBMQoN+7eQ35Nhc01SvA7OEMSFzTv8c/0UXc54xfQcj/bNzNmRmNy0zctMpeEQFSio/cdvqUICz9AiEPb+DLK2gE+2MrR5qXPpoAn6mxdr1GBwz1FiclDcAPCEkTXIboByz8guA75eg8WxxDtFZloZIdNKaDu5rnt9UVHE5POep6Zh7llmsQlLBNLSMTiEm5hGXXDJ6qb3zJiLaIiJy1Zpjy587ch1ahOKJ6XHGGiv5KeQSfFun4ulb/josZOYY0di/0tw9YCquX7KZVnFW46Ze2V4wU1ivRYe1UWI1Y1vgkDvo9PGLIoabp7kIrctJXSS8eKtjyTtuDErrK8jIYHuQf8VbK0RJUsLfEg94BfIztkLMvP3v3XN/5rfgIYvAvmgKE6GAAAAABJRU5ErkJggg==');
+		$('DIV.entity SPAN.options IMG.icon.chart').attr('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJYSURBVDjLY/j//z8DJRhMmJQd+x89/W4IRQbY1x5L8590dzmy5PuIqC4gfvA+PPIyEMfhNqD06H+L9gfG9p33/jr23OMEiX30DTj8yT/oFxCf+hAYfBeIfwPxIyBWwjSg5Mh/tYZHzDr1D34aND7Y9tXOsf2Lg/O/z85uNjCFn908lT56eH985xXwzXvygwYUA4yLD/9Xcm+QlS572JWesP7XVyOL79/MLKci22Rc/6DXvPH+X8um+79t2u7/tOu4/w9ugFHxof8wha+1LP89NHT9iaxZIf/BCpWie7/Vi+/N/25kqvrN2Oz/suiO6QgDig6ADfgtJrX0p6TMb1u/Xd+5Eh9M4k16yCyQdH+HYOK9H6JJd+tgBv7U0j3wXVvvA9wAg8J9/6sNAvT/8gr++8Mn1MYQ8aCFIfzBf6bwB3+Zwx/8Ywu7H44e+j8VVX4hDMjf+/8/I6v/fya2OyghHHCn3GuRw3TvJTZnPJdYnXVbbA436Le49Aa4Afp5u///ZGAJ+c3AIg5T4DXT0stjpuULj1nmD9xmW6x1nWu2z2W+6RenBcbxIHmga6XgBujl7vw/R1TDAabZscNommOn0UeHLsNFDj2GPDBxh37DDrtJ+u8x0oFu9vb/liU6khal2jPNS3UfAem3FmU6Gej+tqjX5rBo0rln1qI9GdWArG3/jTI0/Q0z1N3UAyxdgTQ4NQpreMjCFAqpOoHZRvnqUhpROhmmxRo8cAO0M7f8187Y/F8rYxMQb/yvlbYBiNf/1wTh1HX/NUA4ZS0Ur/mvkbwajOEGUIIBf5BxjDvwFIUAAAAASUVORK5CYII=');
+		$('DIV.entity SPAN.options A.btn').tooltip();
 		
 		// add image data to MRTG logo
 		$('IMG.mrtg-l').attr('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAD8AAAAZBAMAAAB0hOvHAAAAGFBMVEV9Zn00XZhfYoiIZ3mybWn/dk3tdFTVcVy/t7hSAAAAAWJLR0QHFmGI6wAAARFJREFUeNqtkr1vwkAMxalU9jofzQwtnYNOEWsRhK5tqMkc0exFVf7/vueE5AISEyed5bN+vmdbnujt8zm5D/Dn3Ep1Q3twPDvVoznu3YCZyJPZSEux86an1knPgOgBJjwDUo8Aes0eJuiBhQ9YMC9GQOID35ZS2c8EdmtUcwXEaxMqu8+iny2L3v4S4OcSLU2oB1QRiNs54D2TiK1IRuAV7rMPfInMJRBBZNF34QOo54XAaQBC9QGUt2KP6CPugGYEwMuYBamk7BU8ADXluEnRActLCQKQiQGEBDatxgDwDf3pvgM+LrpgrEZ2DiCwQT2MB8VJ09R0DKhMYwCwOFq6R1znsFFpw0jODcvutrS3gH9HWKtq4xNkGAAAAEN0RVh0U29mdHdhcmUAQCgjKUltYWdlTWFnaWNrIDQuMi45IDk5LzA5LzAxIGNyaXN0eUBteXN0aWMuZXMuZHVwb250LmNvbe3o2fAAAAAqdEVYdFNpZ25hdHVyZQBkMjI3Yzc0OThhNTAxZTdmYTQ1MDg2YzlmZjQ0YmI5Y1s0iH4AAAAOdEVYdFBhZ2UANjN4MjUrMCswGBJ4lAAAAABJRU5ErkJggg==');
@@ -292,17 +315,45 @@ $dashboard = new Dashboard();
 	});
 	
 	/**
-	 * Refresh all entities.
+	 * Add graph labels.
 	 * 
 	 * @return void
 	 */
-	function updateGraphs() {
+	function addGraphLabels() {
+		
+		// remove existing labels
+		$('DIV.graphLabel').each(function() { $(this).remove(); });
+		
+		// add new labels
+		$('DIV.entity DIV.graphs IMG.graph').each(function() {
+			var scale = $(this).attr('scale');
+			var label = $('<div class="graphLabel '+scale+'">'+scale+'</div>');
+			$(this).parent().append(label);
+		});
+		
+	}
+	
+	/**
+	 * Refresh all entities.
+	 * 
+	 * @param specificGraph		- pass one graph IMG just to process that one
+	 * 
+	 * @return void
+	 */
+	function updateGraphs(specificGraph) {
+		
+		// if no specific graph passed then update all
+		if (specificGraph) {
+			var graphs = specificGraph;
+		} else {
+			var graphs = $('IMG.graph');
+		}
 		
 		// update graphs
-		$('IMG.graph').each(function() {
+		graphs.each(function() {
 			var graph = $(this);
 			$(this).fadeTo('slow', 0.25, function() {
-				$(this).attr('src', $(this).attr('original')+"?i=" + (Math.random()*1000));
+				$(this).attr('src', $(this).attr('entity')+'-'+$(this).attr('scale')+'.png?i=' + (Math.random()*1000));
 				$(this).fadeTo('slow', 1);
 			});
 		});
@@ -343,14 +394,15 @@ $dashboard = new Dashboard();
 	<div class="entity">
 
 		<span class="options">
-			<a href="<?php echo $entity->log; ?>"><img width="16" height="16" class="icon log" data-toggle="tooltip" alt="download log file" title="download log file" data-placement="bottom" /></a>
+			<a class="btn change-scale" data-toggle="tooltip" title="change graph scales" data-placement="bottom"><img width="16" height="16" class="icon time" alt="change graph scales" /></a>
+			<a href="<?php echo $entity->log; ?>" class="btn" data-toggle="tooltip" title="download log file" data-placement="bottom"><img width="16" height="16" class="icon log" alt="download log file" /></a>
 		</span>
 		
 		<h2><a href="<?php print $entity->link; ?>"><?php print $entity->title; ?></a></h2>
 
 		<div class="graphs">
-			<a href="<?php print $entity->link; ?>"><img class="graph" scale="day" original="<?php print $entity->getGraph('day'); ?>" src="<?php print $entity->getGraph('day'); ?>" /></a>
-			<a href="<?php print $entity->link; ?>"><img class="graph" scale="week" original="<?php print $entity->getGraph('week'); ?>" src="<?php print $entity->getGraph('day'); ?>" /></a>
+			<img class="graph graph-left" scale="day" entity="<?php print $entity->name; ?>" src="<?php print $entity->getGraph('day'); ?>" />
+			<img class="graph graph-right" scale="week" entity="<?php print $entity->name; ?>" src="<?php print $entity->getGraph('day'); ?>" />
 		</div>
 	
 	</div>
