@@ -16,4 +16,4 @@ Simply place index.php inside your MRTG directory on your web server. That's it.
 
 ==Todo==
 
-# Perhaps use Highcharts to render the data directly.
+# Complete Highcharts feature (need to sort out the varying date scales)

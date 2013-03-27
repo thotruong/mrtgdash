@@ -25,7 +25,7 @@ class Dashboard {
 	 * 
 	 * @var string 
 	 */
-	public $version = '1.004';
+	public $version = '1.005';
 	
 	/**
 	 * MRTG entities
@@ -146,6 +146,7 @@ $dashboard = new Dashboard();
 	
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script type="text/javascript" src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+	<script src="https://code.highcharts.com/highcharts.js"></script>
 	
 	<style type="text/css">
 
@@ -206,6 +207,10 @@ $dashboard = new Dashboard();
 			font-weight: normal;
 			font-size: 150%;
 			margin-left: 10px;
+		}
+		
+		DIV.modal H3 {
+			font-size: 125%;
 		}
 
 		DIV.entity IMG.graph {
@@ -296,6 +301,114 @@ $dashboard = new Dashboard();
 			
 		});
 		
+		// highchart button click
+		$('A.highchart').click(function() {
+		
+			// get chart modal object
+			var modal = $('#modal-highchart');
+			
+			// get entity and label
+			var entity = $(this).attr('entity');
+			modal.find('DIV.modal-header > H3').html($(this).attr('label'));
+			
+			// destroy any existing chart
+			modal.find('DIV#highchart').remove();
+			
+			// retrieve log file
+			$.ajax({
+				url: $(this).attr('entity')+'.log',
+				
+				success: function(log) {
+					
+					// parse log file
+					var logLines = new Array();
+					var logArr = log.split('\n');
+					for (var i=1; i<=logArr.length; i++) {
+						if (i>1) {
+							var lineStr = new String(logArr[i]);
+							var cellArr = lineStr.split(' ');
+							if (cellArr[1] != 0 || cellArr[2] != 0 || cellArr[3] != 0 || cellArr[4] != 0) logLines.push(cellArr);
+						}
+						i++;
+					}
+					
+					// structures for chart data
+					var inData = new Array();
+					var outData = new Array();
+					
+					// extract data into arrays
+					for (var i in logLines) {
+						
+						// keep last date
+						var dateStamp = logLines[i][0];
+						if (dateStamp.length >= 10) {
+							var lastDate = parseInt(dateStamp);
+						}
+						
+						// prepare bytes in and out
+						var inBytes = parseInt(logLines[i][1]/1024);
+						var outBytes = parseInt(logLines[i][2]/1024);
+						if (inBytes < 0) inBytes = 0;
+						if (outBytes < 0) outBytes = 0;
+						inData.push(inBytes);
+						outData.push(outBytes);
+						
+					}
+					
+					// reverse arrays
+					inData.reverse();
+					outData.reverse();
+
+					// create chart container
+					var chart = $('<div id="highchart"></div>');
+					modal.find('DIV.modal-body').append(chart);
+					
+					// create chart
+					chart.highcharts({
+						chart: { type: 'spline', zoomType: 'x' },
+						title: { text: null },
+						tooltip: { valueSuffix: ' kB/s' },
+						xAxis: { type: 'datetime' },
+						yAxis: {
+							title: { text: 'Kilobytes per second (average)' },
+							plotLines: [{
+								value: 0,
+								width: 1,
+								color: '#808080'
+							}]
+						},
+						plotOptions: {
+							spline: {
+								lineWidth: 1,
+								states: {
+									hover: { lineWidth: 2 }
+								},
+								marker: { enabled: false },
+								pointInterval: (1800*1000),	// 5 mins
+								pointStart: (lastDate*1000)
+							}
+						},
+						series: [
+							{ name: 'In', data: inData, color: 'rgb(0,204,0)' },
+							{ name: 'Out', data: outData, color: 'rgb(0,0,255)' }
+						]
+					});
+					
+				},
+				
+				error: function() {
+					modal.find('DIV.modal-body').html('Unable to load '+$(this).attr('entity')+'.log from the server.');
+				}
+				
+			});
+		
+			// show modal
+			modal.modal({ show: true, backdrop: false })
+				.css('width', '1000px')
+				.css('margin-left', function() { return -($(this).width() / 2); } );
+		
+		});
+		
 		// handle clicks on the graphs
 		$('IMG.graph').click(function() {
 			window.location = $(this).attr('entity')+'.html';
@@ -304,7 +417,7 @@ $dashboard = new Dashboard();
 		// add images and tooltips to option icons
 		$('DIV.entity SPAN.options IMG.icon.log').attr('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADoSURBVBgZBcExblNBGAbA2ceegTRBuIKOgiihSZNTcC5LUHAihNJR0kGKCDcYJY6D3/77MdOinTvzAgCw8ysThIvn/VojIyMjIyPP+bS1sUQIV2s95pBDDvmbP/mdkft83tpYguZq5Jh/OeaYh+yzy8hTHvNlaxNNczm+la9OTlar1UdA/+C2A4trRCnD3jS8BB1obq2Gk6GU6QbQAS4BUaYSQAf4bhhKKTFdAzrAOwAxEUAH+KEM01SY3gM6wBsEAQB0gJ+maZoC3gI6iPYaAIBJsiRmHU0AALOeFC3aK2cWAACUXe7+AwO0lc9eTHYTAAAAAElFTkSuQmCC');
 		$('DIV.entity SPAN.options IMG.icon.time').attr('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAKrSURBVDjLpdPbT9IBAMXx/qR6qNbWUy89WS5rmVtutbZalwcNgyRLLMyuoomaZpRQCt5yNRELL0TkBSXUTBT5hZSXQPwBAvor/fZGazlb6+G8nIfP0znbgG3/kz+Knsbb+xxNV63DLxVLHzqV0vCrfMluzFmw1OW8ePEwf8+WgM1UXDnapVgLePr5Nj9DJBJGFEN8+TzKqL2RzkenV4yl5ws2BXob1WVeZxXhoB+PP0xzt0Bly0fKTePozV5GphYQPA46as+gU5/K+w2w6Ev2Ol/KpNCigM01R2uPgDcQIRSJEYys4JmNoO/y0tbnY9JlxnA9M15bfHZHCnjzVN4x7TLz6fMSJqsPgLAoMvV1niSQBGIbUP3Ki93t57XhItVXjulTQHf9hfk5/xgGyzQTgQjx7xvE4nG0j3UsiiLR1VVaLN3YpkTuNLgZGzRSq8wQUoD16flkOPSF28/cLCYkwqvrrAGXC1UYWtuRX1PR5RhgTJTI1Q4wKwzwWHk4kQI6a04nQ99mUOlczMYkFhPrBMQoN+7eQ35Nhc01SvA7OEMSFzTv8c/0UXc54xfQcj/bNzNmRmNy0zctMpeEQFSio/cdvqUICz9AiEPb+DLK2gE+2MrR5qXPpoAn6mxdr1GBwz1FiclDcAPCEkTXIboByz8guA75eg8WxxDtFZloZIdNKaDu5rnt9UVHE5POep6Zh7llmsQlLBNLSMTiEm5hGXXDJ6qb3zJiLaIiJy1Zpjy587ch1ahOKJ6XHGGiv5KeQSfFun4ulb/josZOYY0di/0tw9YCquX7KZVnFW46Ze2V4wU1ivRYe1UWI1Y1vgkDvo9PGLIoabp7kIrctJXSS8eKtjyTtuDErrK8jIYHuQf8VbK0RJUsLfEg94BfIztkLMvP3v3XN/5rfgIYvAvmgKE6GAAAAABJRU5ErkJggg==');
-		$('DIV.entity SPAN.options IMG.icon.chart').attr('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJYSURBVDjLY/j//z8DJRhMmJQd+x89/W4IRQbY1x5L8590dzmy5PuIqC4gfvA+PPIyEMfhNqD06H+L9gfG9p33/jr23OMEiX30DTj8yT/oFxCf+hAYfBeIfwPxIyBWwjSg5Mh/tYZHzDr1D34aND7Y9tXOsf2Lg/O/z85uNjCFn908lT56eH985xXwzXvygwYUA4yLD/9Xcm+QlS572JWesP7XVyOL79/MLKci22Rc/6DXvPH+X8um+79t2u7/tOu4/w9ugFHxof8wha+1LP89NHT9iaxZIf/BCpWie7/Vi+/N/25kqvrN2Oz/suiO6QgDig6ADfgtJrX0p6TMb1u/Xd+5Eh9M4k16yCyQdH+HYOK9H6JJd+tgBv7U0j3wXVvvA9wAg8J9/6sNAvT/8gr++8Mn1MYQ8aCFIfzBf6bwB3+Zwx/8Ywu7H44e+j8VVX4hDMjf+/8/I6v/fya2OyghHHCn3GuRw3TvJTZnPJdYnXVbbA436Le49Aa4Afp5u///ZGAJ+c3AIg5T4DXT0stjpuULj1nmD9xmW6x1nWu2z2W+6RenBcbxIHmga6XgBujl7vw/R1TDAabZscNommOn0UeHLsNFDj2GPDBxh37DDrtJ+u8x0oFu9vb/liU6khal2jPNS3UfAem3FmU6Gej+tqjX5rBo0rln1qI9GdWArG3/jTI0/Q0z1N3UAyxdgTQ4NQpreMjCFAqpOoHZRvnqUhpROhmmxRo8cAO0M7f8187Y/F8rYxMQb/yvlbYBiNf/1wTh1HX/NUA4ZS0Ur/mvkbwajOEGUIIBf5BxjDvwFIUAAAAASUVORK5CYII=');
+		$('DIV.entity SPAN.options IMG.icon.highchart').attr('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJYSURBVDjLY/j//z8DJRhMmJQd+x89/W4IRQbY1x5L8590dzmy5PuIqC4gfvA+PPIyEMfhNqD06H+L9gfG9p33/jr23OMEiX30DTj8yT/oFxCf+hAYfBeIfwPxIyBWwjSg5Mh/tYZHzDr1D34aND7Y9tXOsf2Lg/O/z85uNjCFn908lT56eH985xXwzXvygwYUA4yLD/9Xcm+QlS572JWesP7XVyOL79/MLKci22Rc/6DXvPH+X8um+79t2u7/tOu4/w9ugFHxof8wha+1LP89NHT9iaxZIf/BCpWie7/Vi+/N/25kqvrN2Oz/suiO6QgDig6ADfgtJrX0p6TMb1u/Xd+5Eh9M4k16yCyQdH+HYOK9H6JJd+tgBv7U0j3wXVvvA9wAg8J9/6sNAvT/8gr++8Mn1MYQ8aCFIfzBf6bwB3+Zwx/8Ywu7H44e+j8VVX4hDMjf+/8/I6v/fya2OyghHHCn3GuRw3TvJTZnPJdYnXVbbA436Le49Aa4Afp5u///ZGAJ+c3AIg5T4DXT0stjpuULj1nmD9xmW6x1nWu2z2W+6RenBcbxIHmga6XgBujl7vw/R1TDAabZscNommOn0UeHLsNFDj2GPDBxh37DDrtJ+u8x0oFu9vb/liU6khal2jPNS3UfAem3FmU6Gej+tqjX5rBo0rln1qI9GdWArG3/jTI0/Q0z1N3UAyxdgTQ4NQpreMjCFAqpOoHZRvnqUhpROhmmxRo8cAO0M7f8187Y/F8rYxMQb/yvlbYBiNf/1wTh1HX/NUA4ZS0Ur/mvkbwajOEGUIIBf5BxjDvwFIUAAAAASUVORK5CYII=');
 		$('DIV.entity SPAN.options A.btn').tooltip();
 		
 		// add image data to MRTG logo
@@ -370,6 +483,23 @@ $dashboard = new Dashboard();
 
 <body>
 
+<div id="modal-highchart" class="modal hide" role="dialog" aria-hidden="true">
+
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<h3></h3>
+	</div>
+
+	<div class="modal-body">
+		
+	</div>
+
+	<div class="modal-footer">
+		<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+	</div>
+
+</div>
+	
 <div class="container" id="pageframe">
 
 <div id="header">
@@ -388,12 +518,13 @@ $dashboard = new Dashboard();
 	<h1><?php print $dashboard->title; ?></h1>
 	
 </div> <!-- header -->
-	
+
 <?php foreach ($dashboard->entities as $entity) : ?>
 
 	<div class="entity">
 
 		<span class="options">
+			<a class="btn highchart" entity="<?php print $entity->name; ?>" label="<?php print $entity->title; ?>" data-toggle="tooltip" title="create better graph" data-placement="bottom"><img width="16" height="16" class="icon highchart" alt="create better graph" /></a>
 			<a class="btn change-scale" data-toggle="tooltip" title="change graph scales" data-placement="bottom"><img width="16" height="16" class="icon time" alt="change graph scales" /></a>
 			<a href="<?php echo $entity->log; ?>" class="btn" data-toggle="tooltip" title="download log file" data-placement="bottom"><img width="16" height="16" class="icon log" alt="download log file" /></a>
 		</span>
