@@ -1,8 +1,6 @@
 ==Introduction==
 
-MRTG Dashboard is a self contained PHP script which turns your directory of MRTG graphs into a pretty dashboard.
-
-It is still in development, but otherwise fully working.
+MRTG Dashboard is a self contained PHP script which turns your directory of MRTG graphs into a pretty dashboard. It also uses your MRTG data to produce some more modern and useful graphs if you're bored with squinting at blocky image graphs.
 
 ==Requirements==
 
