@@ -13,7 +13,3 @@ It is still in development, but otherwise fully working.
 ==Installation==
 
 Simply place index.php inside your MRTG directory on your web server. That's it.
-
-==Todo==
-
-# Complete Highcharts feature (need to sort out the varying date scales)

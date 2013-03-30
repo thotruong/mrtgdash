@@ -25,7 +25,7 @@ class Dashboard {
 	 * 
 	 * @var string 
 	 */
-	public $version = '1.005';
+	public $version = '1.006';
 	
 	/**
 	 * MRTG entities
@@ -94,8 +94,13 @@ class Entity {
 	
 	/**
 	 * Construct.
+	 * 
+	 * @throws Exception
 	 */
 	public function __construct($name) {
+		
+		// check entity exists
+		if (!is_file("{$name}.html")) throw new Exception("Could not find MRTG files for entity {$name}");
 		
 		// add name
 		$this->name = $name;
@@ -122,7 +127,85 @@ class Entity {
 	public function getGraph($scale) {
 		return "{$this->name}-{$scale}.png";
 	}
+	
+	/**
+	 * Retrieve and process the entity's log file.
+	 * 
+	 * @param boolean $max Set to true to retrieve maximum in/out rather than average.
+	 * 
+	 * @return string JSON encoded data
+	 */
+	public function retrieveLog($max=false) {
+		
+		// arrays for parsed data
+		$in = $out = $stamps = array();
+		
+		foreach (file("{$this->name}.log") as $line) {
+			
+			// ignore the summary line
+			if (!isset($header)) {
+				$header = $line;
+				continue;
+			}
+			
+			$parts = explode(' ', rtrim($line));
+			if ($parts[1] == 0 && $parts[2] == 0 && $parts[3] == 0 && $parts[4] == 0) continue;
+			
+			array_push($stamps, $parts[0]);
+			
+			if ($max) {
+				$in[] = round($parts[3]/1024);
+				$out[] = round($parts[4]/1024);
+			} else {
+				$in[] = round($parts[1]/1024);
+				$out[] = round($parts[2]/1024);
+			}
+			
+		}
 
+		// determine earliest and latest timestamps
+		$latest = array_shift($stamps);
+		$earliest = array_pop($stamps);
+		
+		// calculate average interval
+		$interval = round(($latest - $earliest) / count($stamps)+2, 0);
+		
+		// encode and return response
+		return json_encode(array(
+			'earliest'	=> $earliest,
+			'latest'	=> $latest,
+			'interval'	=> $interval,
+			'intervalMin'	=> round($interval/60, 0),
+			'inData'	=> array_reverse($in),
+			'outData'	=> array_reverse($out)
+		));
+		
+	}
+
+}
+
+// trap AJAX requests
+if (isset($_POST['action'])) {
+	
+	switch ($_POST['action']) {
+		
+		case 'log':
+			
+			try {
+				$entity = new Entity($_POST['entity']);
+				$json = $entity->retrieveLog();
+			} catch (Exception $e) {
+				$json = json_encode(array('error' => "entity not found"));
+			}
+			
+			break;
+		
+	}
+	
+	// return data and terminate
+	print $json;
+	exit;
+	
 }
 
 // setup
@@ -146,7 +229,7 @@ $dashboard = new Dashboard();
 	
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script type="text/javascript" src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
-	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script type="text/javascript" src="http://code.highcharts.com/highcharts.js"></script>
 	
 	<style type="text/css">
 
@@ -262,6 +345,8 @@ $dashboard = new Dashboard();
 				margin-left: 2px;
 				margin-right: 2px;
 			}
+			
+		
 
 	</style>
 	
@@ -316,48 +401,12 @@ $dashboard = new Dashboard();
 			
 			// retrieve log file
 			$.ajax({
-				url: $(this).attr('entity')+'.log',
+			
+				dataType: 'json',
+				type: 'POST',
+				data: { action: 'log', entity: entity },
 				
 				success: function(log) {
-					
-					// parse log file
-					var logLines = new Array();
-					var logArr = log.split('\n');
-					for (var i=1; i<=logArr.length; i++) {
-						if (i>1) {
-							var lineStr = new String(logArr[i]);
-							var cellArr = lineStr.split(' ');
-							if (cellArr[1] != 0 || cellArr[2] != 0 || cellArr[3] != 0 || cellArr[4] != 0) logLines.push(cellArr);
-						}
-						i++;
-					}
-					
-					// structures for chart data
-					var inData = new Array();
-					var outData = new Array();
-					
-					// extract data into arrays
-					for (var i in logLines) {
-						
-						// keep last date
-						var dateStamp = logLines[i][0];
-						if (dateStamp.length >= 10) {
-							var lastDate = parseInt(dateStamp);
-						}
-						
-						// prepare bytes in and out
-						var inBytes = parseInt(logLines[i][1]/1024);
-						var outBytes = parseInt(logLines[i][2]/1024);
-						if (inBytes < 0) inBytes = 0;
-						if (outBytes < 0) outBytes = 0;
-						inData.push(inBytes);
-						outData.push(outBytes);
-						
-					}
-					
-					// reverse arrays
-					inData.reverse();
-					outData.reverse();
 
 					// create chart container
 					var chart = $('<div id="highchart"></div>');
@@ -367,8 +416,11 @@ $dashboard = new Dashboard();
 					chart.highcharts({
 						chart: { type: 'spline', zoomType: 'x' },
 						title: { text: null },
-						tooltip: { valueSuffix: ' kB/s' },
-						xAxis: { type: 'datetime' },
+						tooltip: { valueSuffix: ' kb/s' },
+						xAxis: {
+							title: { text: 'Average interval: '+(log.intervalMin)+' minutes' },
+							type: 'datetime'
+						},
 						yAxis: {
 							title: { text: 'Kilobytes per second (average)' },
 							plotLines: [{
@@ -384,20 +436,20 @@ $dashboard = new Dashboard();
 									hover: { lineWidth: 2 }
 								},
 								marker: { enabled: false },
-								pointInterval: (1800*1000),	// 5 mins
-								pointStart: (lastDate*1000)
+								pointInterval: (log.interval * 1000),
+								pointStart: (log.earliest * 1000)
 							}
 						},
 						series: [
-							{ name: 'In', data: inData, color: 'rgb(0,204,0)' },
-							{ name: 'Out', data: outData, color: 'rgb(0,0,255)' }
+							{ name: 'In', data: log.inData, color: 'rgb(0,204,0)' },
+							{ name: 'Out', data: log.outData, color: 'rgb(0,0,255)' }
 						]
 					});
 					
 				},
 				
 				error: function() {
-					modal.find('DIV.modal-body').html('Unable to load '+$(this).attr('entity')+'.log from the server.');
+					modal.find('DIV.modal-body').html('<div class="alert alert-error">Unable to load '+$(this).attr('entity')+'.log from the server.</div>');
 				}
 				
 			});
