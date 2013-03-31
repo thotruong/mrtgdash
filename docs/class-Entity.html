@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="generator" content="ApiGen 2.8.0" />
+
+	<title>Class Entity | MRTG Dashboard</title>
+
+	<script type="text/javascript" src="resources/combined.js?4111343915"></script>
+	<script type="text/javascript" src="elementlist.js?276457969"></script>
+	<link rel="stylesheet" type="text/css" media="all" href="resources/style.css?3505392360" />
+
+</head>
+
+<body>
+<div id="left">
+	<div id="menu">
+		<a href="index.html" title="Overview"><span>Overview</span></a>
+
+
+		<div id="groups">
+			<h3>Namespaces</h3>
+			<ul>
+				<li class="active"><a href="namespace-None.html">None</a>
+						</li>
+				<li><a href="namespace-PHP.html">PHP</a>
+						</li>
+			</ul>
+		</div>
+
+		<hr />
+
+
+		<div id="elements">
+			<h3>Classes</h3>
+			<ul>
+				<li><a href="class-Dashboard.html">Dashboard</a></li>
+				<li class="active"><a href="class-Entity.html">Entity</a></li>
+			</ul>
+
+
+
+
+
+		</div>
+	</div>
+</div>
+
+<div id="splitter"></div>
+
+<div id="right">
+<div id="rightInner">
+	<form id="search">
+		<input type="hidden" name="cx" value="" />
+		<input type="hidden" name="ie" value="UTF-8" />
+		<input type="text" name="q" class="text" />
+		<input type="submit" value="Search" />
+	</form>
+
+	<div id="navigation">
+		<ul>
+			<li>
+				<a href="index.html" title="Overview"><span>Overview</span></a>
+			</li>
+			<li>
+				<a href="namespace-None.html" title="Summary of None"><span>Namespace</span></a>
+			</li>
+			<li class="active">
+<span>Class</span>			</li>
+		</ul>
+		<ul>
+			<li>
+				<a href="tree.html" title="Tree view of classes, interfaces, traits and exceptions"><span>Tree</span></a>
+			</li>
+		</ul>
+		<ul>
+		</ul>
+	</div>
+
+<div id="content" class="class">
+	<h1>Class Entity</h1>
+
+
+	<div class="description">
+	
+<p>Entity class represents each MRTG entity found in the current directory.</p>
+
+	</div>
+
+
+
+
+
+
+
+
+
+	<div class="info">
+		
+		
+		
+		
+
+				<b>License:</b>
+				<a href="http://www.gnu.org/licenses/gpl.html">http://www.gnu.org/licenses/gpl.html</a><br />
+				<b>Author:</b>
+				Stuart Ford<br />
+		<b>Located at</b> <a href="source-class-Entity.html#62-185" title="Go to source code">index.php</a><br />
+	</div>
+
+
+
+	<table class="summary" id="methods">
+	<caption>Methods summary</caption>
+	<tr data-order="__construct" id="___construct">
+
+		<td class="attributes"><code>
+			 public 
+			
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#___construct">#</a>
+		<code><a href="source-class-Entity.html#95-118" title="Go to source code">__construct</a>( <span>mixed <var>$name</var></span> )</code>
+
+		<div class="description short">
+			
+<p>Construct.</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Construct.</p>
+
+
+
+
+
+				<h4>Throws</h4>
+				<div class="list">
+					<code><code><a href="class-Exception.html">Exception</a></code></code><br />
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="getGraph" id="_getGraph">
+
+		<td class="attributes"><code>
+			 public 
+			string
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_getGraph">#</a>
+		<code><a href="source-class-Entity.html#120-129" title="Go to source code">getGraph</a>( <span>string <var>$scale</var></span> )</code>
+
+		<div class="description short">
+			
+<p>Get graph.</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Get graph.</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$scale</var></dt>
+					<dd><code>string</code><br>$scale (day, week, month, year)</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>string</code><br />
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="retrieveLog" id="_retrieveLog">
+
+		<td class="attributes"><code>
+			 public 
+			string
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_retrieveLog">#</a>
+		<code><a href="source-class-Entity.html#131-183" title="Go to source code">retrieveLog</a>( <span>boolean <var>$max</var> = <span class="php-keyword1">false</span></span> )</code>
+
+		<div class="description short">
+			
+<p>Retrieve and process the entity's log file.</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Retrieve and process the entity's log file.</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$max</var></dt>
+					<dd><code>boolean</code><br>$max Set to true to retrieve maximum in/out rather than average.</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>string</code><br>JSON encoded data<br />
+				</div>
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	</table>
+
+
+
+
+
+
+
+
+
+
+
+
+	<table class="summary" id="properties">
+	<caption>Properties summary</caption>
+	<tr data-order="name" id="$name">
+		<td class="attributes"><code>
+			public  
+			string
+		</code></td>
+
+		<td class="name">
+				<a href="source-class-Entity.html#67-72" title="Go to source code"><var>$name</var></a>
+		</td>
+		<td class="value"><code></code></td>
+		<td class="description"><div>
+			<a href="#$name" class="anchor">#</a>
+
+			<div class="description short">
+				
+<p>Entity name.</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>Entity name.</p>
+
+
+			</div>
+		</div></td>
+	</tr>
+	<tr data-order="title" id="$title">
+		<td class="attributes"><code>
+			public  
+			string
+		</code></td>
+
+		<td class="name">
+				<a href="source-class-Entity.html#74-79" title="Go to source code"><var>$title</var></a>
+		</td>
+		<td class="value"><code></code></td>
+		<td class="description"><div>
+			<a href="#$title" class="anchor">#</a>
+
+			<div class="description short">
+				
+<p>Entity title.</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>Entity title.</p>
+
+
+			</div>
+		</div></td>
+	</tr>
+	<tr data-order="link" id="$link">
+		<td class="attributes"><code>
+			public  
+			string
+		</code></td>
+
+		<td class="name">
+				<a href="source-class-Entity.html#81-86" title="Go to source code"><var>$link</var></a>
+		</td>
+		<td class="value"><code></code></td>
+		<td class="description"><div>
+			<a href="#$link" class="anchor">#</a>
+
+			<div class="description short">
+				
+<p>Entity page link.</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>Entity page link.</p>
+
+
+			</div>
+		</div></td>
+	</tr>
+	<tr data-order="log" id="$log">
+		<td class="attributes"><code>
+			public  
+			string
+		</code></td>
+
+		<td class="name">
+				<a href="source-class-Entity.html#88-93" title="Go to source code"><var>$log</var></a>
+		</td>
+		<td class="value"><code></code></td>
+		<td class="description"><div>
+			<a href="#$log" class="anchor">#</a>
+
+			<div class="description short">
+				
+<p>Entity log file.</p>
+
+			</div>
+
+			<div class="description detailed hidden">
+				
+<p>Entity log file.</p>
+
+
+			</div>
+		</div></td>
+	</tr>
+	</table>
+
+
+
+
+
+
+</div>
+
+	<div id="footer">
+		MRTG Dashboard API documentation generated by <a href="http://apigen.org">ApiGen 2.8.0</a>
+	</div>
+</div>
+</div>
+</body>
+</html>
