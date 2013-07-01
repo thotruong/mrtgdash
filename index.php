@@ -25,7 +25,7 @@ class Dashboard {
 	 * 
 	 * @var string 
 	 */
-	public $version = '1.006';
+	public $version = '1.007';
 	
 	/**
 	 * MRTG entities
@@ -129,7 +129,7 @@ class Entity {
 	}
 	
 	/**
-	 * Retrieve and process the entity's log file.
+	 * Retrieve and process the last 24 hours from entity's log file.
 	 * 
 	 * @param boolean $max Set to true to retrieve maximum in/out rather than average.
 	 * 
@@ -150,6 +150,7 @@ class Entity {
 			
 			$parts = explode(' ', rtrim($line));
 			if ($parts[1] == 0 && $parts[2] == 0 && $parts[3] == 0 && $parts[4] == 0) continue;
+			if ($parts[0] < (time() - 2592000)) continue;
 			
 			array_push($stamps, $parts[0]);
 			
@@ -224,12 +225,12 @@ $dashboard = new Dashboard();
 	<meta http-equiv="pragma" content="no-cache" />
 	<meta http-equiv="cache-control" content="no-cache" />
 
-	<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" />
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&#038;subset=latin,latin-ext" type="text/css" media="all" />
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" />
+	<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700&#038;subset=latin,latin-ext" type="text/css" media="all" />
 	
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-	<script type="text/javascript" src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="http://code.highcharts.com/highcharts.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script type="text/javascript" src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="//code.highcharts.com/highcharts.js"></script>
 	
 	<style type="text/css">
 
@@ -576,7 +577,7 @@ $dashboard = new Dashboard();
 	<div class="entity">
 
 		<span class="options">
-			<a class="btn highchart" entity="<?php print $entity->name; ?>" label="<?php print $entity->title; ?>" data-toggle="tooltip" title="create better graph" data-placement="bottom"><img width="16" height="16" class="icon highchart" alt="create better graph" /></a>
+			<a class="btn highchart" entity="<?php print $entity->name; ?>" label="<?php print $entity->title; ?>" data-toggle="tooltip" title="create better graph (last 30 days)" data-placement="bottom"><img width="16" height="16" class="icon highchart" alt="create better graph" /></a>
 			<a class="btn change-scale" data-toggle="tooltip" title="change graph scales" data-placement="bottom"><img width="16" height="16" class="icon time" alt="change graph scales" /></a>
 			<a href="<?php echo $entity->log; ?>" class="btn" data-toggle="tooltip" title="download log file" data-placement="bottom"><img width="16" height="16" class="icon log" alt="download log file" /></a>
 		</span>
