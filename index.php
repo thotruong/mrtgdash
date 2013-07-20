@@ -1,4 +1,4 @@
-<?
+<?php
 
 /**
  * MRTG Dashboard.
